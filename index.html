@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Agusan RBFFWC Virtual Terrain Model</title>
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<base target="_blank">
+<link rel="stylesheet" type="text/css" href="./Qgis2threejs.css">
+<style type="text/css">
+#popup, #header, #layerpanel {
+  left: 36px;
+}
+</style>
+<script src="./threejs/three.min.js"></script>
+<script src="./threejs/OrbitControls.js"></script>
+<script src="./threejs/ViewHelper.js"></script>
+<script src="./tweenjs/tween.js"></script>
+<script src="./Qgis2threejs.js"></script>
+</head>
+<body>
+<div id="view">
+  <div id="northarrow"></div>
+  <div id="navigation"></div>
+</div>
+
+<!-- popup -->
+<div id="popup">
+  <div id="closebtn">&times;</div>
+  <div id="popupbar"></div>
+  <div id="popupbody">
+    <div id="popupcontent"></div>
+
+    <!-- query result -->
+    <div id="queryresult">
+      <table id="qr_coords_table">
+        <caption>Clicked coordinates <div id="zoomtopoint" class="action-zoom zoombtn"></div></caption>
+        <tr><td id="qr_coords"></td></tr>
+      </table>
+
+      <table id="qr_layername_table">
+        <caption>Layer <div id="zoomtolayer" class="action-zoom zoombtn"></div></caption>
+        <tr><td id="qr_layername"></td></tr>
+      </table>
+
+      <table id="qr_attrs_table">
+        <caption>Attributes</caption>
+      </table>
+
+      <!-- camera actions and measure tool -->
+      <div id="orbitbtn" class="action-btn action-orbit">Orbit</div>
+      <div id="measurebtn" class="action-btn">Measure distance</div>
+    </div>
+
+    <!-- page info -->
+    <div id="pageinfo">
+      <h1>Current View URL</h1>
+      <div><input id="urlbox" type="text"></div>
+
+      <h1>Usage</h1>
+      <table id="usage">
+        <tr><td colspan="2" class="star">Mouse</td></tr>
+        <tr><td>Left button + Move</td><td>Orbit</td></tr>
+        <tr><td>Mouse Wheel</td><td>Zoom</td></tr>
+        <tr><td>Right button + Move</td><td>Pan</td></tr>
+
+        <tr><td colspan="2" class="star">Keys</td></tr>
+        <tr><td>Arrow keys</td><td>Move Horizontally</td></tr>
+        <tr><td>Shift + Arrow keys</td><td>Orbit</td></tr>
+        <tr><td>Ctrl + Arrow keys</td><td>Rotate</td></tr>
+        <tr><td>Shift + Ctrl + Up / Down</td><td>Zoom In / Out</td></tr>
+        <tr><td>L</td><td>Toggle Label Visibility</td></tr>
+        <tr><td>R</td><td>Start / Stop Orbit Animation</td></tr>
+        <tr><td>W</td><td>Wireframe Mode</td></tr>
+        <tr><td>Shift + R</td><td>Reset Camera Position</td></tr>
+        <tr><td>Shift + S</td><td>Save Image</td></tr>
+      </table>
+
+      <h1>About</h1>
+      <div id="about"><img src="./Qgis2threejs.png">
+        This page was made for the visualization of Agusan River Basin.</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- progress bar -->
+<div id="progress"><div id="progressbar"></div></div>
+
+<!-- menu -->
+<div id="toolbtns">
+  <div id="layerbtn"></div>
+  <div id="animbtn" class="hidden"></div>
+  <div id="infobtn"></div>
+</div>
+
+<!-- header and footer -->
+<div id="header"></div>
+<div id="footer"><hr style="margin:0px 0; border:0; border-top:2px solid #ccc;">
+
+<div style="text-align:left; font-family:'Georgia', serif; font-size:0.9em; color:#555; line-height:1.4;">
+  © 2025 Engr. Kent James L. Cantero.  
+  Developed for <span style="font-weight:bold;">PAGASA</span> personnel to support  
+  lectures, training, and educational activities on flood forecasting and early warning.  
+  <br>
+  Copying or redistribution in whole or in part requires prior written permission  
+  from the author.
+</div></div>
+
+<!-- layer panel -->
+<div id="layerpanel">
+  <div id="layerlist"></div>
+</div>
+
+<!-- animation -->
+<div id="narrativebox" class="ef1">
+  <div id="narbody">
+    <div id="nar_0cbe9bb2" class="narcontent">
+      <div style="text-align:center; font-family:'Georgia', serif; line-height:1.5;">
+      
+        <img src="./data/Agusan RBFFWC 3D Map v1/img/Agusan RBFFWC.jpg" style="width:100%; border-radius:12px; box-shadow:0px 4px 10px rgba(0,0,0,0.2); margin-bottom:10px;">
+      
+      
+        <h2 style="font-style:italic; font-weight:bold; margin:10px 0; color:#2c3e50;">
+          3D Visualization Platform of the Agusan River Basin
+        </h2>
+      
+        <p style="font-size:1.1em; color:#333; margin:0 auto; max-width:95%;">
+          This <span style="font-style:italic;">interactive geospatial diorama</span> highlights the work of  
+          <span style="font-weight:bold;">PAGASA</span> through its  
+          <span style="font-weight:bold;">Flood Forecasting and Warning Center</span> in the  
+          <span style="font-weight:bold;">CARAGA Region</span>.  
+          It presents the network of <span style="font-weight:bold;">synoptic and hydrometeorological stations</span>  
+          together with the <span style="font-weight:bold;">X-band radar</span>, all overlaid on a  
+          <span style="font-style:italic;">realistic 3D terrain</span>.  
+          By combining science and visualization, the platform demonstrates PAGASA’s vital role in  
+          <span style="font-style:italic;">monitoring rivers and strengthening flood forecasting and early warning</span>  
+          for the Agusan River Basin.
+        </p>
+      
+      </div>
+    </div>
+  </div>
+  <div id="nextbtn"></div>
+</div>
+
+<script>
+Q3D.Config.allVisible = true;
+Q3D.Config.viewpoint = {lookAt:{x:125.6348234301823,y:8.834980169669775,z:727.3406543731677},pos:{x:125.3430880083089,y:10.401496282302062,z:4123.306173750076}};
+Q3D.Config.localMode = true;
+Q3D.Config.animation.enabled = true;
+Q3D.Config.animation.startOnLoad = true;
+Q3D.Config.northArrow.enabled = true;
+Q3D.Config.northArrow.color = 0x666666;
+
+var container = document.getElementById("view"),
+    app = Q3D.application,
+    gui = Q3D.gui;
+
+app.init(container);       // initialize viewer
+
+// load the scene
+app.loadSceneFile("./data/Agusan RBFFWC 3D Map v1/scene.js", function (scene) {
+  // scene file has been loaded
+  app.start();
+}, function (scene) {
+  // all relevant files have been loaded
+
+});
+</script>
+</body>
+</html>
